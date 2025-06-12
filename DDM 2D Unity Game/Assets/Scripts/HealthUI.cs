@@ -15,7 +15,7 @@ public class HealthUI : MonoBehaviour
     {
         this.maxHearts = maxHearts; // Store it for later
 
-        foreach(Image heart in hearts)
+        foreach (Image heart in hearts)
         {
             Destroy(heart.gameObject);
         }
@@ -34,7 +34,7 @@ public class HealthUI : MonoBehaviour
     {
         for (int i = 0; i < maxHearts; i++)
         {
-            if(i < currentHealth)
+            if (i < currentHealth)
             {
                 hearts[i].sprite = fullHeartSprite;
                 hearts[i].color = Color.red;

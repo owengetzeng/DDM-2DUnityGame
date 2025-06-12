@@ -24,15 +24,19 @@ public class PlayerHealth : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+
         Enemy enemy = collision.GetComponent<Enemy>();
         if (enemy)
         {
             TakeDamage(enemy.damage);
+
+            Debug.Log("Player took  damage");
+
         }
     }
 
@@ -45,8 +49,8 @@ public class PlayerHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            //player dead
-            OnPlayedDied.Invoke();
+            Debug.Log("Player has died.");
+            OnPlayedDied?.Invoke();
         }
     }
 

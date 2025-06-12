@@ -21,10 +21,10 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundLayer;
     bool isGrounded;
 
-     [Header("Gravity")]
-     public float baseGravity = 2f;
-     public float maxFallSpeed = 18f;
-     public float fallSpeedMultiplier = 2f;
+    [Header("Gravity")]
+    public float baseGravity = 2f;
+    public float maxFallSpeed = 18f;
+    public float fallSpeedMultiplier = 2f;
 
     [Header("WallCheck")]
     public Transform wallCheckPos;
@@ -40,73 +40,81 @@ public class PlayerMovement : MonoBehaviour
     float wallJumpTime = 0.5f;
     float wallJumpTimer;
     public Vector2 wallJumpPower = new Vector2(5f, 10f);
+
+    [SerializeField] private PlayerMovement movementScript;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
         GroundCheck();
         Gravity();
-       
+
         ProcessWallSlide();
         ProcessWallJump();
-if(!isWallJumping)
-{
- rb.linearVelocity = new Vector2(horizontalMovement * moveSpeed, rb.linearVelocity.y);
-  Flip();
-}
-       
+        if (!isWallJumping)
+        {
+            rb.linearVelocity = new Vector2(horizontalMovement * moveSpeed, rb.linearVelocity.y);
+            Flip();
+        }
+
+
+
     }
 
-    private void Gravity() {
-        if(rb.linearVelocity.y < 0)
+    private void Gravity()
+    {
+        if (rb.linearVelocity.y < 0)
         {
             rb.gravityScale = baseGravity * fallSpeedMultiplier;
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -maxFallSpeed));
         }
-        else {
+        else
+        {
             rb.gravityScale = baseGravity;
         }
     }
 
-private void ProcessWallSlide()
-{
-    if (!isGrounded && WallCheck() && horizontalMovement != 0)
+    private void ProcessWallSlide()
     {
-        isWallSliding = true;
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -wallSlideSpeed));
+        if (!isGrounded && WallCheck() && horizontalMovement != 0)
+        {
+            isWallSliding = true;
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -wallSlideSpeed));
+        }
+        else
+        {
+            isWallSliding = false;
+        }
     }
-    else
-    {
-        isWallSliding = false;
-    }
-}
 
-private void ProcessWallJump(){
-    if(isWallSliding)
+    private void ProcessWallJump()
+    {
+        if (isWallSliding)
+        {
+            isWallJumping = false;
+            wallJumpDirection = -transform.localScale.x;
+            wallJumpTimer = wallJumpTime;
+
+            CancelInvoke(nameof(CancelWallJump));
+        }
+        else if (wallJumpTimer > 0f)
+        {
+            wallJumpTimer -= Time.deltaTime;
+        }
+    }
+
+    private void CancelWallJump()
     {
         isWallJumping = false;
-        wallJumpDirection = -transform.localScale.x;
-        wallJumpTimer = wallJumpTime;
 
-        CancelInvoke(nameof(CancelWallJump));
     }
-    else if(wallJumpTimer > 0f)
-    {
-        wallJumpTimer -= Time.deltaTime;
-    }
-}
-
-private void CancelWallJump()
-{
-    isWallJumping = false;
-
-}
 
     public void Move(InputAction.CallbackContext context)
     {
@@ -117,28 +125,29 @@ private void CancelWallJump()
     {
         if (jumpsRemaining > 0)
         {
-            if(context.performed)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpPower);
-            jumpsRemaining--;
-        }
+            if (context.performed)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpPower);
+                jumpsRemaining--;
+            }
             else if (context.canceled)
-        {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
-            jumpsRemaining--;
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
+                jumpsRemaining--;
+            }
         }
-    }
-        if(context.performed && wallJumpTimer > 0f)
+        if (context.performed && wallJumpTimer > 0f)
         {
             isWallJumping = true;
             rb.linearVelocity = new Vector2(wallJumpDirection * wallJumpPower.x, wallJumpPower.y);
             wallJumpTimer = 0;
 
-            if(transform.localScale.x != wallJumpDirection) {
-                  isFacingRight = !isFacingRight;
-            Vector3 ls = transform.localScale;
-            ls.x *= -1f;
-            transform.localScale = ls;
+            if (transform.localScale.x != wallJumpDirection)
+            {
+                isFacingRight = !isFacingRight;
+                Vector3 ls = transform.localScale;
+                ls.x *= -1f;
+                transform.localScale = ls;
             }
 
             Invoke(nameof(CancelWallJump), wallJumpTime + 0.1f);
@@ -165,7 +174,7 @@ private void CancelWallJump()
 
     public void Flip()
     {
-        if(isFacingRight && horizontalMovement < 0 || !isFacingRight && horizontalMovement > 0)
+        if (isFacingRight && horizontalMovement < 0 || !isFacingRight && horizontalMovement > 0)
         {
             isFacingRight = !isFacingRight;
             Vector3 ls = transform.localScale;
